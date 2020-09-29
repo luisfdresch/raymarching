@@ -8,10 +8,16 @@ struct cube
     l
 end
 
-mutable struct viewer_pos
+mutable struct polar
     r
     theta
     phi
+end
+
+mutable struct cartesian
+    x::Float64
+    y::Float64
+    z::Float64
 end
 
 function newpos!(key, viewer_position)
@@ -36,8 +42,51 @@ function close(win, renderer)
    # SDL2.Quit()
 end
 
-function update_canvas(renderer, cube, viewer_position)
-    println("test")
+function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
+    
+    #  distance from point to cube
+    # while distance > threshold 
+    #   distance from point to cube
+    #   point new position based on distance calculated and ray_dir
+    #   if distance > draw_distance
+    #       break
+    #   end
+    # end
+    # 
+
+end
+
+function polar2cartesian(p)
+    x = p.r * sin(p.theta) * cos(p.phi)
+    y = p.r * sin(p.theta) * sin(p.phi)
+    z = p.r * cos(p.theta)
+    return (x, y, z)
+end
+
+# TODO finish update_canvas function, and raymarching algorithm
+function update_canvas(renderer, cube, viewer_pos_polar)
+    #create matrix
+    FOV = deg2rad(30)
+    viewer_pos_cartesian = cartesian(ploar2cartesian(viewer_pos_polar))
+     
+    target_polar = polar()
+    target_polar.r = viewer_pos_polar.r
+    for i=1:512, j=1:512
+        #defining targer point
+        target_polar.theta = viewer_pos_polar.theta + pi - FOV + (i-1)*FOV*2/512
+        target_polar.phi = viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512
+        target_cartesian = cartesian(polar2cartesian(target_polar))
+        #defining direction from viewer to target
+        ray_dir = cartesian(
+                            target_cartesian.x - viewer_pos_cartesian.x,
+                            target_cartesian.y - viewer_pos_cartesian.y,
+                            target_cartesian.z - viewer_pos_cartesian.z
+                           )
+
+        distance = raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
+    #   raymarching
+    end
+    #push matrix to 
 end
 
 function main_loop(win, renderer, keys_dict, cube, viewer_position)
@@ -69,6 +118,6 @@ function app()
     
     cube1 = cube(0,0,0,1)
     
-    starting_pos = viewer_pos(5, 0, 0)
+    starting_pos = polar(5, 0, 0)
     main_loop(win, renderer, keys_dict, cube1, starting_pos)
 end
