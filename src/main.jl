@@ -4,7 +4,7 @@ const SDL2 = SimpleDirectMediaLayer
 struct cube
     x
     y
-    x
+    z
     l
 end
 
@@ -27,18 +27,33 @@ function newpos!(key, viewer_position)
     end
 end
 
-function main_loop(renderer, keys_dict, cube, viewer_position)
+# FIXME
+# fix the exit function
+function close(win, renderer)
+    SDL2.DestroyRenderer(renderer)
+   # SDL2.DestroyWindow(win)
+   # SDL2.QuitSubSystem(SDL2.INIT_EVERYTHING)    
+   # SDL2.Quit()
+end
+
+function update_canvas(renderer, cube, viewer_position)
+    println("test")
+end
+
+function main_loop(win, renderer, keys_dict, cube, viewer_position)
     update_canvas(renderer, cube, viewer_position)
     while true
         SDL2.PumpEvents()
         e = SDL2.event()
         if typeof(e) == SDL2.KeyboardEvent && e._type == SDL2.KEYDOWN
-            if e.keysym.sym in keys_dict.keys
+            if e.keysym.sym in keys_dict.keys 
                 newpos!(keys_dict[keysym.sym], viewer_position)
                 update_canvas(renderer, cube, viewer_position)
             end
+        elseif typeof(e) == SDL2.WindowEvent && e.event == 14
+            close(win, renderer)
         end
-        
+    end
 end
 
 
@@ -55,5 +70,5 @@ function app()
     cube1 = cube(0,0,0,1)
     
     starting_pos = viewer_pos(5, 0, 0)
-   # main_loop(renderer, keys_dict, cube1, starting_pos)
+    main_loop(win, renderer, keys_dict, cube1, starting_pos)
 end
