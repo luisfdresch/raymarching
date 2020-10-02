@@ -1,5 +1,11 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[Artifacts]]
+deps = ["Pkg"]
+git-tree-sha1 = "c30985d8821e0cd73870b17b0ed0ce6dc44cb744"
+uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+version = "1.3.0"
+
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
@@ -15,15 +21,42 @@ git-tree-sha1 = "c6c9c288df5ad1e6534c9dacd9972482c1eb838c"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.0+5"
 
+[[CodeTracking]]
+deps = ["InteractiveUtils", "UUIDs"]
+git-tree-sha1 = "2884932d84a30e6873c49f97e939734329ac044b"
+uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
+version = "1.0.3"
+
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
 git-tree-sha1 = "4bffea7ed1a9f0f3d1a131bbcd4b925548d75288"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 version = "0.10.9"
 
+[[Crayons]]
+git-tree-sha1 = "3f71217b538d7aaee0b69ab47d9b7724ca8afa0d"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.0.4"
+
 [[Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[Debugger]]
+deps = ["CodeTracking", "Crayons", "Highlights", "InteractiveUtils", "JuliaInterpreter", "Markdown", "REPL"]
+git-tree-sha1 = "c37eca3eff2657c700f32e05500215feac886dcf"
+uuid = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
+version = "0.6.6"
+
+[[Distributed]]
+deps = ["Random", "Serialization", "Sockets"]
+uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
+[[DocStringExtensions]]
+deps = ["LibGit2", "Markdown", "Pkg", "Test"]
+git-tree-sha1 = "50ddf44c53698f5e784bbebb3f4b21c5807401b1"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.8.3"
 
 [[Expat_jll]]
 deps = ["Libdl", "Pkg"]
@@ -85,6 +118,12 @@ git-tree-sha1 = "30237d3202f1d4ad9eda0a53b4272078effc50cd"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.6.1+9"
 
+[[Highlights]]
+deps = ["DocStringExtensions", "InteractiveUtils", "REPL"]
+git-tree-sha1 = "f823a2d04fb233d52812c8024a6d46d9581904a4"
+uuid = "eafb193a-b7ab-5a9e-9068-77385905fa72"
+version = "0.4.5"
+
 [[ICU_jll]]
 deps = ["Libdl", "Pkg"]
 git-tree-sha1 = "b8de23644ee96884110e8071deed3ff0d2de4d9d"
@@ -95,11 +134,22 @@ version = "67.1.0+1"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
+[[JLLWrappers]]
+git-tree-sha1 = "2328532679aacb230a6be6c9cbaf477ad5d1915f"
+uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
+version = "1.1.0"
+
 [[JpegTurbo_jll]]
 deps = ["Libdl", "Pkg"]
 git-tree-sha1 = "76e28bf35d0c179531b11e254f66bbcc1fd268ca"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "2.0.1+2"
+
+[[JuliaInterpreter]]
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "5b9b328eeea7bb85caca1576c15041e8faeb9041"
+uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
+version = "0.8.1"
 
 [[LZO_jll]]
 deps = ["Libdl", "Pkg"]
@@ -127,10 +177,10 @@ uuid = "d4300ac3-e22c-5743-9152-c294e39db1e4"
 version = "1.8.5+3"
 
 [[Libglvnd_jll]]
-deps = ["Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_libXext_jll"]
-git-tree-sha1 = "30a990af9ce535bcba54d1f23f071a7e714f861e"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_libXext_jll"]
+git-tree-sha1 = "5b1a5ff82d8a17e119369a004f60b2ac81a79b64"
 uuid = "7e76a0d4-f3c7-5321-8279-8d96eeed0f29"
-version = "1.3.0+1"
+version = "1.3.0+2"
 
 [[Libgpg_error_jll]]
 deps = ["Libdl", "Pkg"]
@@ -253,6 +303,10 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[[Test]]
+deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]

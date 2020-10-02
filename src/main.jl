@@ -42,6 +42,23 @@ function close(win, renderer)
    # SDL2.Quit()
 end
 
+function distance(point, cube)
+    dx = cube.x - point.x
+    dy = cube.y - point.y
+    dz = cube.z - point.z
+    A = B = C = 0
+    m = cube.l/2
+    if Bool(prod(abs.((dx,dy,dz)) .< m)) #if all the distances are inside the cube 
+        return -1
+    end
+    if abs(dx) > m;  A = 1 end
+    if abs(dy) > m;  B = 1 end 
+    if abs(dz) > m;  C = 1 end
+
+    distance = sqrt(A*dx^2 + B*dy^2 + C*dz^2) - sqrt(A+B+C)*m
+    return distance
+end
+
 function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
     
     #  distance from point to cube
