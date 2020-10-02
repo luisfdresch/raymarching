@@ -2,16 +2,16 @@ using SimpleDirectMediaLayer
 const SDL2 = SimpleDirectMediaLayer
 
 struct cube
-    x
-    y
-    z
-    l
+    x::Float64
+    y::Float64
+    z::Float64
+    l::Float64
 end
 
 mutable struct polar
-    r
-    theta
-    phi
+    r::Float64
+    theta::Float64
+    phi::Float64
 end
 
 mutable struct cartesian
@@ -57,9 +57,9 @@ function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
 end
 
 function polar2cartesian(p)
-    x = p.r * sin(p.theta) * cos(p.phi)
-    y = p.r * sin(p.theta) * sin(p.phi)
-    z = p.r * cos(p.theta)
+    x::Float64 = p.r * sin(p.theta) * cos(p.phi)
+    y::Float64 = p.r * sin(p.theta) * sin(p.phi)
+    z::Float64 = p.r * cos(p.theta)
     return (x, y, z)
 end
 
