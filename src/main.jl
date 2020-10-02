@@ -42,7 +42,7 @@ function close(win, renderer)
    # SDL2.Quit()
 end
 
-function distance(point, cube)
+function distance(point::cartesian, cube::cube)
     dx = cube.x - point.x
     dy = cube.y - point.y
     dz = cube.z - point.z
@@ -59,20 +59,27 @@ function distance(point, cube)
     return distance
 end
 
+function advance(point, dir, incr)
+    return cartesian(
+                     point.x + incr*dir.x
+                     point.y + incr*dir.y
+                     point.z + incr*dir.z
+                    )
+end
+
 function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
     increment = threshold + 1
     total = 0
     point = viwer-position
     while increment > threshold 
         increment = distance(point, cube)
-
-    #   point new position based on distance calculated and ray_dir
-    #   if distance > draw_distance
-    #       break
-    #   end
-    # end
-    # 
-
+        point = advance(point, ray_dir, increment)
+        total += increment
+        if total > draw_distance
+            break
+        end
+    end
+    return total
 end
 
 function polar2cartesian(p)
@@ -83,7 +90,7 @@ function polar2cartesian(p)
 end
 
 function norm_dir(A, B)
-    dx = B.x - AA.x
+    dx = B.x - A.x
     dy = B.y - A.y
     dz = B.z - A.z
 
