@@ -60,10 +60,12 @@ function distance(point, cube)
 end
 
 function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
-    
-    #  distance from point to cube
-    # while distance > threshold 
-    #   distance from point to cube
+    increment = threshold + 1
+    total = 0
+    point = viwer-position
+    while increment > threshold 
+        increment = distance(point, cube)
+
     #   point new position based on distance calculated and ray_dir
     #   if distance > draw_distance
     #       break
@@ -80,6 +82,15 @@ function polar2cartesian(p)
     return (x, y, z)
 end
 
+function norm_dir(A, B)
+    dx = B.x - AA.x
+    dy = B.y - A.y
+    dz = B.z - A.z
+
+    n_dx, n_dy, n_dz = (dx, dy, dz)./(sqrt(dx^2+ dy^2 + dz^2))
+    return cartesian(n_dx, n_dy, n_dz)
+end
+
 # TODO finish update_canvas function, and raymarching algorithm
 function update_canvas(renderer, cube, viewer_pos_polar)
     #create matrix
@@ -94,11 +105,7 @@ function update_canvas(renderer, cube, viewer_pos_polar)
         target_polar.phi = viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512
         target_cartesian = cartesian(polar2cartesian(target_polar))
         #defining direction from viewer to target
-        ray_dir = cartesian(
-                            target_cartesian.x - viewer_pos_cartesian.x,
-                            target_cartesian.y - viewer_pos_cartesian.y,
-                            target_cartesian.z - viewer_pos_cartesian.z
-                           )
+        ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
         distance = raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
     #   raymarching
