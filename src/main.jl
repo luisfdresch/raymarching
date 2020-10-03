@@ -37,9 +37,10 @@ end
 # fix the exit function
 function close(win, renderer)
     SDL2.DestroyRenderer(renderer)
-   # SDL2.DestroyWindow(win)
-   # SDL2.QuitSubSystem(SDL2.INIT_EVERYTHING)    
-   # SDL2.Quit()
+    SDL2.DestroyWindow(win)
+    SDL2.QuitSubSystem(SDL2.INIT_EVERYTHING)    
+    SDL2.Quit()
+    exit()
 end
 
 function distance(point::cartesian, cube::cube)
@@ -61,8 +62,8 @@ end
 
 function advance(point, dir, incr)
     return cartesian(
-                     point.x + incr*dir.x
-                     point.y + incr*dir.y
+                     point.x + incr*dir.x,
+                     point.y + incr*dir.y,
                      point.z + incr*dir.z
                     )
 end
@@ -70,7 +71,7 @@ end
 function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
     increment = threshold + 1
     total = 0
-    point = viwer-position
+    point = viewer_position
     while increment > threshold 
         increment = distance(point, cube)
         point = advance(point, ray_dir, increment)
@@ -86,7 +87,7 @@ function polar2cartesian(p)
     x::Float64 = p.r * sin(p.theta) * cos(p.phi)
     y::Float64 = p.r * sin(p.theta) * sin(p.phi)
     z::Float64 = p.r * cos(p.theta)
-    return (x, y, z)
+    return x, y, z
 end
 
 function norm_dir(A, B)
@@ -98,26 +99,32 @@ function norm_dir(A, B)
     return cartesian(n_dx, n_dy, n_dz)
 end
 
-# TODO finish update_canvas function, and raymarching algorithm
 function update_canvas(renderer, cube, viewer_pos_polar)
     #create matrix
     FOV = deg2rad(30)
-    viewer_pos_cartesian = cartesian(ploar2cartesian(viewer_pos_polar))
-     
-    target_polar = polar()
+    viewer_pos_cartesian = cartesian(polar2cartesian(viewer_pos_polar)...)
+    A = zeros(512,512) 
+    target_polar = polar(0,0,0)
     target_polar.r = viewer_pos_polar.r
-    for i=1:512, j=1:512
+    draw_distance = 15
+    threshold = 0.1
+    for i::Int32 =1:512, j::Int32 =1:512
         #defining targer point
         target_polar.theta = viewer_pos_polar.theta + pi - FOV + (i-1)*FOV*2/512
         target_polar.phi = viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512
-        target_cartesian = cartesian(polar2cartesian(target_polar))
+        target_cartesian = cartesian(polar2cartesian(target_polar)...)
         #defining direction from viewer to target
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
-        distance = raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
-    #   raymarching
+        distance = raymarching(cube, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
+       # A[i,j] = distance
+       #
+        attenuation = 1/(1+ 0.1 *distance^2) 
+        SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation)), Int64(floor(180*attenuation)), Int64(floor(120*attenuation)), 255)
+        SDL2.RenderDrawPoint(renderer, i, j)
     end
     #push matrix to 
+    SDL2.RenderPresent(renderer)
 end
 
 function main_loop(win, renderer, keys_dict, cube, viewer_position)
@@ -127,8 +134,9 @@ function main_loop(win, renderer, keys_dict, cube, viewer_position)
         e = SDL2.event()
         if typeof(e) == SDL2.KeyboardEvent && e._type == SDL2.KEYDOWN
             if e.keysym.sym in keys_dict.keys 
-                newpos!(keys_dict[keysym.sym], viewer_position)
+                newpos!(keys_dict[e.keysym.sym], viewer_position)
                 update_canvas(renderer, cube, viewer_position)
+                println(viewer_position)
             end
         elseif typeof(e) == SDL2.WindowEvent && e.event == 14
             close(win, renderer)
@@ -149,6 +157,9 @@ function app()
     
     cube1 = cube(0,0,0,1)
     
-    starting_pos = polar(5, 0, 0)
+    starting_pos = polar(10, 0, 0)
     main_loop(win, renderer, keys_dict, cube1, starting_pos)
 end
+
+app()
+
