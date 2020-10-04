@@ -133,8 +133,8 @@ function update_canvas(renderer, cube, viewer_pos_polar)
         distance = raymarching(cube, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
        # A[i,j] = distance
        #
-        attenuation = 1/(1+ 0.1 *distance^3) 
-        SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation)), Int64(floor(180*attenuation)), Int64(floor(120*attenuation)), 255)
+       attenuation = 1/(1+ 0.1*distance + 0.02 *distance^2) 
+        SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation)), Int64(floor(250*attenuation)), Int64(floor(200*attenuation)), 255)
         SDL2.RenderDrawPoint(renderer, j, i)
     end
     #push matrix to 
