@@ -109,18 +109,31 @@ function update_canvas(renderer, cube, viewer_pos_polar)
     target_polar.r = viewer_pos_polar.r
     draw_distance = 25
     threshold = 0.01
+    dir1 = norm_dir(cartesian(0,0,0), cartesian(polar2cartesian(polar(viewer_pos_polar.r, viewer_pos_polar.theta - pi/2, viewer_pos_polar.phi))...))
+    dir2 = norm_dir(cartesian(0,0,0), cartesian(polar2cartesian(polar(viewer_pos_polar.r, pi/2 , viewer_pos_polar.phi+pi/2 ))...))
+    starting_point = advance(cartesian(0,0,0), dir1, viewer_pos_polar.r*tan(FOV/2))
+    starting_point = advance(starting_point, dir2, viewer_pos_polar.r*tan(FOV/2))
+    target_cartesian = starting_point
     for i::Int32 =1:512, j::Int32 =1:512
         #defining targer point
-        target_polar.theta = viewer_pos_polar.theta + pi - FOV + (i-1)*FOV*2/512
-        target_polar.phi = (viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512)
-        target_cartesian = cartesian(polar2cartesian(target_polar)...)
+        target_cartesian = advance(starting_point, dir1,- viewer_pos_polar.r*tan(FOV)*(i-1)/512)
+        target_cartesian = advance(target_cartesian, dir2, -viewer_pos_polar.r*tan(FOV)*(j-1)/512)
+        #
+        #
+        #
+        #
+        #
+        #
+        #target_polar.theta = viewer_pos_polar.theta + pi - FOV + (i-1)*FOV*2/512
+        #target_polar.phi = (viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512)
+        #target_cartesian = cartesian(polar2cartesian(target_polar)...)
         #defining direction from viewer to target
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
         distance = raymarching(cube, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
        # A[i,j] = distance
        #
-        attenuation = 1/(1+ 0.1 *distance^2) 
+        attenuation = 1/(1+ 0.1 *distance^3) 
         SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation)), Int64(floor(180*attenuation)), Int64(floor(120*attenuation)), 255)
         SDL2.RenderDrawPoint(renderer, j, i)
     end
@@ -158,7 +171,7 @@ function app()
     
     cube1 = cube(0,0,0,1)
     
-    starting_pos = polar(10, 0, 0)
+    starting_pos = polar(6, 0, 0)
     main_loop(win, renderer, keys_dict, cube1, starting_pos)
 end
 
