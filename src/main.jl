@@ -22,19 +22,17 @@ end
 
 function newpos!(key, viewer_position)
     increment = deg2rad(5) 
-    if key == :W
+    if key == :D
         viewer_position.phi += increment
-    elseif key == :A
-        viewer_position.theta -= increment
     elseif key == :S
+        viewer_position.theta -= increment
+    elseif key == :A
         viewer_position.phi -= increment
-    elseif key == :D
+    elseif key == :W
         viewer_position.theta += increment
     end
 end
 
-# FIXME
-# fix the exit function
 function close(win, renderer)
     SDL2.DestroyRenderer(renderer)
     SDL2.DestroyWindow(win)
@@ -69,11 +67,14 @@ function advance(point, dir, incr)
 end
 
 function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
-    increment = threshold + 1
+    increment = threshold 
     total = 0
     point = viewer_position
-    while increment > threshold 
+    while increment >= threshold 
         increment = distance(point, cube)
+        if increment < 0
+            break
+        end
         point = advance(point, ray_dir, increment)
         total += increment
         if total > draw_distance
@@ -103,15 +104,15 @@ function update_canvas(renderer, cube, viewer_pos_polar)
     #create matrix
     FOV = deg2rad(30)
     viewer_pos_cartesian = cartesian(polar2cartesian(viewer_pos_polar)...)
-    A = zeros(512,512) 
+    #A = zeros(512,512) 
     target_polar = polar(0,0,0)
     target_polar.r = viewer_pos_polar.r
-    draw_distance = 15
-    threshold = 0.1
+    draw_distance = 25
+    threshold = 0.01
     for i::Int32 =1:512, j::Int32 =1:512
         #defining targer point
         target_polar.theta = viewer_pos_polar.theta + pi - FOV + (i-1)*FOV*2/512
-        target_polar.phi = viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512
+        target_polar.phi = (viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512)
         target_cartesian = cartesian(polar2cartesian(target_polar)...)
         #defining direction from viewer to target
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
@@ -121,7 +122,7 @@ function update_canvas(renderer, cube, viewer_pos_polar)
        #
         attenuation = 1/(1+ 0.1 *distance^2) 
         SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation)), Int64(floor(180*attenuation)), Int64(floor(120*attenuation)), 255)
-        SDL2.RenderDrawPoint(renderer, i, j)
+        SDL2.RenderDrawPoint(renderer, j, i)
     end
     #push matrix to 
     SDL2.RenderPresent(renderer)
@@ -153,7 +154,7 @@ function app()
     win = SDL2.CreateWindow("Raymarching experiment", Int32(100), Int32(100), Int32(win_w), Int32(win_h), UInt32(SDL2.WINDOW_SHOWN))
     SDL2.SetWindowResizable(win, false)
     renderer = SDL2.CreateRenderer(win, Int32(-1), UInt32(SDL2.RENDERER_ACCELERATED | SDL2.RENDERER_PRESENTVSYNC))
-    keys_dict = Dict([(119, :W), (97, :A), (100, :S), (115, :D)]);
+    keys_dict = Dict([(119, :W), (97, :A), (115, :S), (100, :D)]);
     
     cube1 = cube(0,0,0,1)
     
