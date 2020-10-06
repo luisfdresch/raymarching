@@ -66,12 +66,16 @@ function advance(point, dir, incr)
                     )
 end
 
-function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
-    increment = threshold 
+function raymarching(solids, viewer_position, ray_dir, draw_distance, threshold)
     total = 0
+    distances = zeros(length(solids))
     point = viewer_position
+    increment = threshold
     while increment >= threshold 
-        increment = distance(point, cube)
+        for (i, solid) in enumerate(solids)
+            distances[i] = distance(point, solid)
+        end
+        increment, a = findmin(distances)
         if increment < 0
             break
         end
@@ -100,7 +104,7 @@ function norm_dir(A, B)
     return Cartesian(n_dx, n_dy, n_dz)
 end
 
-function update_canvas(renderer, cube, viewer_pos_spherical)
+function update_canvas(renderer, solids, viewer_pos_spherical)
     #create matrix
     FOV = deg2rad(30)
     viewer_pos_cartesian = Cartesian(spherical2cartesian(viewer_pos_spherical)...)
@@ -121,7 +125,7 @@ function update_canvas(renderer, cube, viewer_pos_spherical)
         #defining direction from viewer to target
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
-        distance = raymarching(cube, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
+        distance = raymarching(solids, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
        # A[i,j] = distance
        #
        attenuation = 1/(1+ 0.1*distance + 0.02 *distance^2) 
@@ -132,15 +136,15 @@ function update_canvas(renderer, cube, viewer_pos_spherical)
     SDL2.RenderPresent(renderer)
 end
 
-function main_loop(win, renderer, keys_dict, cube, viewer_position)
-    update_canvas(renderer, cube, viewer_position)
+function main_loop(win, renderer, keys_dict, solids, viewer_position)
+    update_canvas(renderer, solids, viewer_position)
     while true
         SDL2.PumpEvents()
         e = SDL2.event()
         if typeof(e) == SDL2.KeyboardEvent && e._type == SDL2.KEYDOWN
             if e.keysym.sym in keys_dict.keys 
                 newpos!(keys_dict[e.keysym.sym], viewer_position)
-                update_canvas(renderer, cube, viewer_position)
+                update_canvas(renderer, solids, viewer_position)
                 #println(viewer_position)
             end
         elseif typeof(e) == SDL2.WindowEvent && e.event == 14
@@ -161,10 +165,13 @@ function app()
     keys_dict = Dict([(119, :W), (97, :A), (115, :S), (100, :D)]);
     
     cube1 = Cube(0,0,0,1)
-    
+    cube2 = Cube(1,1,1,1)
+
+    solids = [cube1, cube2]
+
     starting_pos = Spherical(6, 0, 0)
-    main_loop(win, renderer, keys_dict, cube1, starting_pos)
+    main_loop(win, renderer, keys_dict, solids, starting_pos)
 end
 
-app()
+#app()
 
