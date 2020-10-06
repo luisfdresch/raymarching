@@ -1,20 +1,20 @@
 using SimpleDirectMediaLayer 
 const SDL2 = SimpleDirectMediaLayer
 
-struct cube
+struct Cube
     x::Float64
     y::Float64
     z::Float64
     l::Float64
 end
 
-mutable struct polar
+mutable struct Spherical
     r::Float64
     theta::Float64
     phi::Float64
 end
 
-mutable struct cartesian
+mutable struct Cartesian
     x::Float64
     y::Float64
     z::Float64
@@ -41,7 +41,7 @@ function close(win, renderer)
     exit()
 end
 
-function distance(point::cartesian, cube::cube)
+function distance(point::Cartesian, cube::Cube)
     dx = cube.x - point.x
     dy = cube.y - point.y
     dz = cube.z - point.z
@@ -59,7 +59,7 @@ function distance(point::cartesian, cube::cube)
 end
 
 function advance(point, dir, incr)
-    return cartesian(
+    return Cartesian(
                      point.x + incr*dir.x,
                      point.y + incr*dir.y,
                      point.z + incr*dir.z
@@ -84,10 +84,10 @@ function raymarching(cube, viewer_position, ray_dir, draw_distance, threshold)
     return total
 end
 
-function polar2cartesian(p)
-    x::Float64 = p.r * sin(p.theta) * cos(p.phi)
-    y::Float64 = p.r * sin(p.theta) * sin(p.phi)
-    z::Float64 = p.r * cos(p.theta)
+function spherical2cartesian(s)
+    x::Float64 = s.r * sin(s.theta) * cos(s.phi)
+    y::Float64 = s.r * sin(s.theta) * sin(s.phi)
+    z::Float64 = s.r * cos(s.theta)
     return x, y, z
 end
 
@@ -97,36 +97,27 @@ function norm_dir(A, B)
     dz = B.z - A.z
 
     n_dx, n_dy, n_dz = (dx, dy, dz)./(sqrt(dx^2+ dy^2 + dz^2))
-    return cartesian(n_dx, n_dy, n_dz)
+    return Cartesian(n_dx, n_dy, n_dz)
 end
 
-function update_canvas(renderer, cube, viewer_pos_polar)
+function update_canvas(renderer, cube, viewer_pos_spherical)
     #create matrix
     FOV = deg2rad(30)
-    viewer_pos_cartesian = cartesian(polar2cartesian(viewer_pos_polar)...)
+    viewer_pos_cartesian = Cartesian(spherical2cartesian(viewer_pos_spherical)...)
     #A = zeros(512,512) 
-    target_polar = polar(0,0,0)
-    target_polar.r = viewer_pos_polar.r
+    target_spherical = Spherical(0,0,0)
+    target_spherical.r = viewer_pos_spherical.r
     draw_distance = 25
     threshold = 0.01
-    dir1 = norm_dir(cartesian(0,0,0), cartesian(polar2cartesian(polar(viewer_pos_polar.r, viewer_pos_polar.theta - pi/2, viewer_pos_polar.phi))...))
-    dir2 = norm_dir(cartesian(0,0,0), cartesian(polar2cartesian(polar(viewer_pos_polar.r, pi/2 , viewer_pos_polar.phi+pi/2 ))...))
-    starting_point = advance(cartesian(0,0,0), dir1, viewer_pos_polar.r*tan(FOV/2))
-    starting_point = advance(starting_point, dir2, viewer_pos_polar.r*tan(FOV/2))
+    dir1 = norm_dir(Cartesian(0,0,0), Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi))...))
+    dir2 = norm_dir(Cartesian(0,0,0), Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, pi/2 , viewer_pos_spherical.phi+pi/2 ))...))
+    starting_point = advance(Cartesian(0,0,0), dir1, viewer_pos_spherical.r*tan(FOV/2))
+    starting_point = advance(starting_point, dir2, viewer_pos_spherical.r*tan(FOV/2))
     target_cartesian = starting_point
     for i::Int32 =1:512, j::Int32 =1:512
         #defining targer point
-        target_cartesian = advance(starting_point, dir1,- viewer_pos_polar.r*tan(FOV)*(i-1)/512)
-        target_cartesian = advance(target_cartesian, dir2, -viewer_pos_polar.r*tan(FOV)*(j-1)/512)
-        #
-        #
-        #
-        #
-        #
-        #
-        #target_polar.theta = viewer_pos_polar.theta + pi - FOV + (i-1)*FOV*2/512
-        #target_polar.phi = (viewer_pos_polar.phi + pi + FOV - (j-1)*FOV*2/512)
-        #target_cartesian = cartesian(polar2cartesian(target_polar)...)
+        target_cartesian = advance(starting_point, dir1,- viewer_pos_spherical.r*tan(FOV)*(i-1)/512)
+        target_cartesian = advance(target_cartesian, dir2, -viewer_pos_spherical.r*tan(FOV)*(j-1)/512)
         #defining direction from viewer to target
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
@@ -150,7 +141,7 @@ function main_loop(win, renderer, keys_dict, cube, viewer_position)
             if e.keysym.sym in keys_dict.keys 
                 newpos!(keys_dict[e.keysym.sym], viewer_position)
                 update_canvas(renderer, cube, viewer_position)
-                println(viewer_position)
+                #println(viewer_position)
             end
         elseif typeof(e) == SDL2.WindowEvent && e.event == 14
             close(win, renderer)
@@ -169,9 +160,9 @@ function app()
     renderer = SDL2.CreateRenderer(win, Int32(-1), UInt32(SDL2.RENDERER_ACCELERATED | SDL2.RENDERER_PRESENTVSYNC))
     keys_dict = Dict([(119, :W), (97, :A), (115, :S), (100, :D)]);
     
-    cube1 = cube(0,0,0,1)
+    cube1 = Cube(0,0,0,1)
     
-    starting_pos = polar(6, 0, 0)
+    starting_pos = Spherical(6, 0, 0)
     main_loop(win, renderer, keys_dict, cube1, starting_pos)
 end
 
