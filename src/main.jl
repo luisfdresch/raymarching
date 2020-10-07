@@ -165,13 +165,14 @@ function app()
     keys_dict = Dict([(119, :W), (97, :A), (115, :S), (100, :D)]);
     
     cube1 = Cube(0,0,0,1)
-    cube2 = Cube(1,1,1,1)
+    cube2 = Cube(2,1,1,2)
+    cube3 = Cube(-2,1,1,1)
 
-    solids = [cube1, cube2]
+    solids = [cube1, cube2, cube3]
 
-    starting_pos = Spherical(6, 0, 0)
+    starting_pos = Spherical(10, 0, 0)
     main_loop(win, renderer, keys_dict, solids, starting_pos)
 end
 
-#app()
+app()
 
