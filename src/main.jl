@@ -8,6 +8,13 @@ struct Cube
     l::Float64
 end
 
+struct Sphere
+    x::Float64
+    y::Float64
+    z::Float64
+    r::Float64
+end
+
 mutable struct Spherical
     r::Float64
     theta::Float64
@@ -58,6 +65,14 @@ function distance(point::Cartesian, cube::Cube)
     return distance
 end
 
+function distance(point::Cartesian, sphere::Sphere)
+    dx = sphere.x - point.x
+    dy = sphere.y - point.y
+    dz = sphere.z - point.z
+    distance = sqrt(dx^2 + dy^2 + dz^2) - sphere.r
+    return distance
+end
+    
 function advance(point, dir, incr)
     return Cartesian(
                      point.x + incr*dir.x,
@@ -167,8 +182,9 @@ function app()
     cube1 = Cube(0,0,0,1)
     cube2 = Cube(2,1,1,2)
     cube3 = Cube(-2,1,1,1)
+    sphere1 = Sphere(1,3,2,2)
 
-    solids = [cube1, cube2, cube3]
+    solids = [cube1, cube2, cube3, sphere1]
 
     starting_pos = Spherical(10, 0, 0)
     main_loop(win, renderer, keys_dict, solids, starting_pos)
