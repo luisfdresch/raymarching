@@ -1,31 +1,40 @@
 using SimpleDirectMediaLayer 
+using Colors
+
+
 const SDL2 = SimpleDirectMediaLayer
+
 
 struct Cube
     x::Float64
     y::Float64
     z::Float64
     l::Float64
+    color
 end
+
 
 struct Sphere
     x::Float64
     y::Float64
     z::Float64
     r::Float64
+    color
 end
+
 
 mutable struct Spherical
     r::Float64
     theta::Float64
-    phi::Float64
 end
+
 
 mutable struct Cartesian
     x::Float64
     y::Float64
     z::Float64
 end
+
 
 function newpos!(key, viewer_position)
     increment = deg2rad(5) 
@@ -40,6 +49,7 @@ function newpos!(key, viewer_position)
     end
 end
 
+
 function close(win, renderer)
     SDL2.DestroyRenderer(renderer)
     SDL2.DestroyWindow(win)
@@ -47,6 +57,7 @@ function close(win, renderer)
     SDL2.Quit()
     exit()
 end
+
 
 function distance(point::Cartesian, cube::Cube)
     dx = cube.x - point.x
@@ -65,6 +76,7 @@ function distance(point::Cartesian, cube::Cube)
     return distance
 end
 
+
 function distance(point::Cartesian, sphere::Sphere)
     dx = sphere.x - point.x
     dy = sphere.y - point.y
@@ -72,7 +84,8 @@ function distance(point::Cartesian, sphere::Sphere)
     distance = sqrt(dx^2 + dy^2 + dz^2) - sphere.r
     return distance
 end
-    
+
+
 function advance(point, dir, incr)
     return Cartesian(
                      point.x + incr*dir.x,
@@ -81,27 +94,30 @@ function advance(point, dir, incr)
                     )
 end
 
+
 function raymarching(solids, viewer_position, ray_dir, draw_distance, threshold)
     total = 0
     distances = zeros(length(solids))
     point = viewer_position
     increment = threshold
+    a=0
     while increment >= threshold 
         for (i, solid) in enumerate(solids)
             distances[i] = distance(point, solid)
         end
         increment, a = findmin(distances)
         if increment < 0
-            break
+            return total, solid.color
         end
         point = advance(point, ray_dir, increment)
         total += increment
         if total > draw_distance
-            break
+            return total, RGB(1,1,1)
         end
     end
-    return total
+    return total, solids[a].color
 end
+
 
 function spherical2cartesian(s)
     x::Float64 = s.r * sin(s.theta) * cos(s.phi)
@@ -119,37 +135,40 @@ function norm_dir(A, B)
     return Cartesian(n_dx, n_dy, n_dz)
 end
 
+
 function update_canvas(renderer, solids, viewer_pos_spherical)
-    #create matrix
+    # create matrix
     FOV = deg2rad(30)
     viewer_pos_cartesian = Cartesian(spherical2cartesian(viewer_pos_spherical)...)
-    #A = zeros(512,512) 
     target_spherical = Spherical(0,0,0)
     target_spherical.r = viewer_pos_spherical.r
     draw_distance = 25
     threshold = 0.01
-    dir1 = norm_dir(Cartesian(0,0,0), Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi))...))
+
+    dir1 = norm_dir(
+        Cartesian(0, 0, 0),
+        Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi))...))
     dir2 = norm_dir(Cartesian(0,0,0), Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, pi/2 , viewer_pos_spherical.phi+pi/2 ))...))
     starting_point = advance(Cartesian(0,0,0), dir1, viewer_pos_spherical.r*tan(FOV/2))
     starting_point = advance(starting_point, dir2, viewer_pos_spherical.r*tan(FOV/2))
     target_cartesian = starting_point
+
     for i::Int32 =1:512, j::Int32 =1:512
-        #defining targer point
+        # defining targer point
         target_cartesian = advance(starting_point, dir1,- viewer_pos_spherical.r*tan(FOV)*(i-1)/512)
         target_cartesian = advance(target_cartesian, dir2, -viewer_pos_spherical.r*tan(FOV)*(j-1)/512)
-        #defining direction from viewer to target
+        # defining direction from viewer to target
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
-        distance = raymarching(solids, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
-       # A[i,j] = distance
-       #
-       attenuation = 1/(1+ 0.1*distance + 0.02 *distance^2) 
-        SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation)), Int64(floor(250*attenuation)), Int64(floor(200*attenuation)), 255)
+        distance, color = raymarching(solids, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
+        attenuation = 1/(1+ 0*distance + 0.01 *distance^2) 
+        SDL2.SetRenderDrawColor(renderer, Int64(floor(255*attenuation*color.r)), Int64(floor(255*attenuation*color.g)), Int64(floor(255*attenuation*color.b)), 255)
         SDL2.RenderDrawPoint(renderer, j, i)
     end
-    #push matrix to 
+    # push matrix to 
     SDL2.RenderPresent(renderer)
 end
+
 
 function main_loop(win, renderer, keys_dict, solids, viewer_position)
     update_canvas(renderer, solids, viewer_position)
@@ -179,10 +198,10 @@ function app()
     renderer = SDL2.CreateRenderer(win, Int32(-1), UInt32(SDL2.RENDERER_ACCELERATED | SDL2.RENDERER_PRESENTVSYNC))
     keys_dict = Dict([(119, :W), (97, :A), (115, :S), (100, :D)]);
     
-    cube1 = Cube(0,0,0,1)
-    cube2 = Cube(2,1,1,2)
-    cube3 = Cube(-2,1,1,1)
-    sphere1 = Sphere(1,3,2,2)
+    cube1 = Cube(0,0,0,1, parse(RGB, "red"))
+    cube2 = Cube(2,1,1,2, parse(RGB, "yellowgreen"))
+    cube3 = Cube(-2,1,1,1, parse(RGB, "blue"))
+    sphere1 = Sphere(1,3,2,2, parse(RGB, "salmon"))
 
     solids = [cube1, cube2, cube3, sphere1]
 
