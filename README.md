@@ -3,7 +3,7 @@ Simple 3D renderer using raymarching principles.
 
 ![Screencast](./screencast.gif)
 
-Screen recording sped up and loq quality due to gif size issues
+Screen recording sped up and with low quality due to gif size issues
 
 ## Running
 On project's root directory type:
