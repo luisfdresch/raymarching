@@ -113,7 +113,7 @@ function raymarching(solids, viewer_position, ray_dir, draw_distance, threshold)
         point = advance(point, ray_dir, increment)
         total += increment
         if total > draw_distance
-            return total, RGB(1,1,1)
+            return total, RGB(0, 0, 0)
         end
     end
     return total, solids[a].color
@@ -192,11 +192,12 @@ function main_loop(win, renderer, keys_dict, solids, viewer_position)
     while true
         SDL2.PumpEvents()
         e = SDL2.event()
+        # if keyboard key is pressed
         if typeof(e) == SDL2.KeyboardEvent && e._type == SDL2.KEYDOWN
             if e.keysym.sym in keys_dict.keys 
                 newpos!(keys_dict[e.keysym.sym], viewer_position)
                 update_canvas(renderer, solids, viewer_position)
-                println(viewer_position)
+                #println(viewer_position)
             end
         elseif typeof(e) == SDL2.WindowEvent && e.event == 14
             close(win, renderer)
@@ -215,11 +216,13 @@ function app()
     renderer = SDL2.CreateRenderer(win, Int32(-1), UInt32(SDL2.RENDERER_ACCELERATED | SDL2.RENDERER_PRESENTVSYNC))
     keys_dict = Dict([(119, :W), (97, :A), (115, :S), (100, :D)]);
     
+    # Creating solids for visualization
     cube1 = Cube(0,0,0,1, parse(RGB, "red"))
     cube2 = Cube(2,1,1,2, parse(RGB, "yellowgreen"))
     cube3 = Cube(-2,1,1,1, parse(RGB, "blue"))
     sphere1 = Sphere(1,3,2,2, parse(RGB, "salmon"))
-
+    
+    # Gouping solids into list
     solids = [cube1, cube2, cube3, sphere1]
 
     starting_pos = Spherical(10, 0, 0)
