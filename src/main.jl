@@ -26,6 +26,7 @@ end
 mutable struct Spherical
     r::Float64
     theta::Float64
+    phi::Float64
 end
 
 
@@ -126,6 +127,7 @@ function spherical2cartesian(s)
     return x, y, z
 end
 
+
 function norm_dir(A, B)
     dx = B.x - A.x
     dy = B.y - A.y
@@ -208,6 +210,7 @@ function app()
     starting_pos = Spherical(10, 0, 0)
     main_loop(win, renderer, keys_dict, solids, starting_pos)
 end
+
 
 app()
 
