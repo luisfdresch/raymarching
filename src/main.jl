@@ -146,20 +146,35 @@ function update_canvas(renderer, solids, viewer_pos_spherical)
     target_spherical.r = viewer_pos_spherical.r
     draw_distance = 25
     threshold = 0.01
+    
 
+    # create normalized vectors, from which the viewing plane is defined, the origin of the vector is Cartesian(0, 0, 0)
     dir1 = norm_dir(
         Cartesian(0, 0, 0),
-        spherical2cartesian(Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi)))
-    dir2 = norm_dir(Cartesian(0,0,0), spherical2cartesian(Spherical(viewer_pos_spherical.r, pi/2 , viewer_pos_spherical.phi+pi/2 )))
-    starting_point = advance(Cartesian(0,0,0), dir1, viewer_pos_spherical.r*tan(FOV/2))
-    starting_point = advance(starting_point, dir2, viewer_pos_spherical.r*tan(FOV/2))
+        spherical2cartesian(
+            # defining point atop of viewing plane
+            Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi)
+           )
+       )
+
+    dir2 = norm_dir(
+        Cartesian(0, 0, 0),
+        spherical2cartesian(
+            # defining point on the right of the viewing plane
+            Spherical(viewer_pos_spherical.r, pi/2 , viewer_pos_spherical.phi + pi/2) 
+           )
+       )
+
+    # setting the starting_point to the edge of the viweing plane 
+    starting_point = advance(Cartesian(0, 0, 0), dir1, viewer_pos_spherical.r * tan( FOV/2 ))
+    starting_point = advance(starting_point, dir2, viewer_pos_spherical.r * tan(FOV/2))
     target_cartesian = starting_point
 
     for i::Int32 =1:512, j::Int32 =1:512
-        # defining targer point
-        target_cartesian = advance(starting_point, dir1,- viewer_pos_spherical.r*tan(FOV)*(i-1)/512)
-        target_cartesian = advance(target_cartesian, dir2, -viewer_pos_spherical.r*tan(FOV)*(j-1)/512)
-        # defining direction from viewer to target
+        # defining target point
+        target_cartesian = advance(starting_point, dir1, -viewer_pos_spherical.r * tan(FOV) * (i - 1)/512)
+        target_cartesian = advance(target_cartesian, dir2, -viewer_pos_spherical.r * tan(FOV) * (j - 1)/512)
+        # defining direction from viewer to target 
         ray_dir = norm_dir(viewer_pos_cartesian, target_cartesian) 
 
         distance, color = raymarching(solids, viewer_pos_cartesian, ray_dir, draw_distance, threshold)
@@ -181,7 +196,7 @@ function main_loop(win, renderer, keys_dict, solids, viewer_position)
             if e.keysym.sym in keys_dict.keys 
                 newpos!(keys_dict[e.keysym.sym], viewer_position)
                 update_canvas(renderer, solids, viewer_position)
-                #println(viewer_position)
+                println(viewer_position)
             end
         elseif typeof(e) == SDL2.WindowEvent && e.event == 14
             close(win, renderer)
