@@ -1,4 +1,4 @@
-# # Raymarching example
+# Raymarching example
 Simple 3D renderer using raymarching principles.
 
 ![Screencast](./screencast.gif)
