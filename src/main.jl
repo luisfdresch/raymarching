@@ -120,11 +120,11 @@ function raymarching(solids, viewer_position, ray_dir, draw_distance, threshold)
 end
 
 
-function spherical2cartesian(s)
+function spherical2cartesian(s::Spherical)
     x::Float64 = s.r * sin(s.theta) * cos(s.phi)
     y::Float64 = s.r * sin(s.theta) * sin(s.phi)
     z::Float64 = s.r * cos(s.theta)
-    return x, y, z
+    return Cartesian(x, y, z)
 end
 
 
@@ -141,7 +141,7 @@ end
 function update_canvas(renderer, solids, viewer_pos_spherical)
     # create matrix
     FOV = deg2rad(30)
-    viewer_pos_cartesian = Cartesian(spherical2cartesian(viewer_pos_spherical)...)
+    viewer_pos_cartesian = spherical2cartesian(viewer_pos_spherical)
     target_spherical = Spherical(0,0,0)
     target_spherical.r = viewer_pos_spherical.r
     draw_distance = 25
@@ -149,8 +149,8 @@ function update_canvas(renderer, solids, viewer_pos_spherical)
 
     dir1 = norm_dir(
         Cartesian(0, 0, 0),
-        Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi))...))
-    dir2 = norm_dir(Cartesian(0,0,0), Cartesian(spherical2cartesian(Spherical(viewer_pos_spherical.r, pi/2 , viewer_pos_spherical.phi+pi/2 ))...))
+        spherical2cartesian(Spherical(viewer_pos_spherical.r, viewer_pos_spherical.theta - pi/2, viewer_pos_spherical.phi)))
+    dir2 = norm_dir(Cartesian(0,0,0), spherical2cartesian(Spherical(viewer_pos_spherical.r, pi/2 , viewer_pos_spherical.phi+pi/2 )))
     starting_point = advance(Cartesian(0,0,0), dir1, viewer_pos_spherical.r*tan(FOV/2))
     starting_point = advance(starting_point, dir2, viewer_pos_spherical.r*tan(FOV/2))
     target_cartesian = starting_point
